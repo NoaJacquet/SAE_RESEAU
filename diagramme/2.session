@@ -1,0 +1,17 @@
+window_sizes 1920 1031 153 1761 883 96
+cleanlooks_style
+diagrams
+  active  classdiagram_ref 128002 // diagramme1
+    1419 839 100 A4 12 0
+end
+show_stereotypes
+selected operation_ref 129282 // start
+open
+  class_ref 128642 // Message
+  class_ref 128770 // User
+  class_ref 128898 // Application
+  class_ref 129154 // ClientGui
+  deploymentview_ref 128002 // src
+  classview_ref 128130 // unknown
+end
+end
