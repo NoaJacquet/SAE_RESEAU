@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ClientHandler extends Thread {
@@ -11,10 +13,12 @@ public class ClientHandler extends Thread {
     private PrintWriter ecrire;
     private String pseudoClient;
     private Map<String, PrintWriter> clients;
+    private List<String> amis;
 
     public ClientHandler(Socket socket,Map<String, PrintWriter> clients) {
         this.clientSocket = socket;
         this.clients = clients;
+        this.amis=new ArrayList<>();
     }
 
     @Override
@@ -51,15 +55,44 @@ public class ClientHandler extends Thread {
         }
     }
     private void broadcast(String message) {
-        String[] recipientMessage = message.split(",");
-        for (String pseudo : clients.keySet()) {
-            PrintWriter recipientWriter = clients.get(pseudo);
-    
-            if (recipientMessage[0].equals(pseudo) || recipientMessage[0].equals("all")) {
-                recipientWriter.println(pseudoClient +" : "+ recipientMessage[1]);
+        
+
+        if (message.contains("/")){
+            String[] recipientMessage = message.split(" ");
+            if (recipientMessage[0].equals("/follow")) {
+                for (String pseudo : clients.keySet()) {
+                    if (pseudo.equals(recipientMessage[1])) {
+                        PrintWriter recipientWriter = clients.get(pseudo);
+                        recipientWriter.println(pseudoClient + " vous suit");
+                        this.amis.add(recipientMessage[1]);
+                    }
+                }
+                return;
+            }
+
+            else if (recipientMessage[0].equals("/unfollow")){
+                for (String pseudo : clients.keySet()) {
+                    if (pseudo.equals(recipientMessage[1])) {
+                        PrintWriter recipientWriter = clients.get(pseudo);
+                        recipientWriter.println(pseudoClient + " vous suit");
+                        this.amis.add(recipientMessage[1]);
+                    }
+                }
+                return;
             }
         }
-        clients.get(pseudoClient).println(recipientMessage[1]);
+
+        else{
+            String[] recipientMessage = message.split(" : ");
+            for (String pseudo : this.amis) {
+                PrintWriter recipientWriter = clients.get(pseudo);
+                if (recipientMessage[0].equals(pseudo) || recipientMessage[0].equals("all")) {
+                    recipientWriter.println(pseudoClient +" : "+ recipientMessage[1]);
+                    
+                }
+            }
+        }
+
     }
 
 }
