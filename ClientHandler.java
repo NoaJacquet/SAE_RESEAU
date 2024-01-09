@@ -95,4 +95,7 @@ public class ClientHandler extends Thread {
 
     }
 
+    public Map<String, PrintWriter> getClients(){
+        return this.clients;
+    }
 }
