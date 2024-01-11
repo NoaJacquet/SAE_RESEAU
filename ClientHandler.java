@@ -31,7 +31,7 @@ public class ClientHandler extends Thread {
             this.ecrire.println("Veuillez entrer votre pseudo:");   
             pseudoClient = this.lire.readLine();      // Lire le pseudoClient du client
             clients.put(pseudoClient, this.ecrire);   // Enregistrer le pseudoClient et le flux de sortie du client
-
+            System.out.println(pseudoClient + " s'est connecté.");
             // lire les messages du client et diffuser à tous les autres clients
             String message;
             while ((message = this.lire.readLine()) != null) {
