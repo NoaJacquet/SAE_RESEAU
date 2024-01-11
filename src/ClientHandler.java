@@ -1,3 +1,4 @@
+package src;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,7 +32,6 @@ public class ClientHandler extends Thread {
             this.ecrire.println("Veuillez entrer votre pseudo:");   
             pseudoClient = this.lire.readLine();      // Lire le pseudoClient du client
             clients.put(pseudoClient, this.ecrire);   // Enregistrer le pseudoClient et le flux de sortie du client
-
             // lire les messages du client et diffuser à tous les autres clients
             String message;
             while ((message = this.lire.readLine()) != null) {

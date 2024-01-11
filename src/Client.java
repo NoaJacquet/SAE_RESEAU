@@ -1,5 +1,9 @@
+package src;
 import java.io.*;
 import java.net.*;
+import java.sql.SQLException;
+
+import modele.bd.ConnexionBd;
 
 public class Client {
     private static final String SERVER_IP = "localhost";
@@ -40,5 +44,12 @@ public class Client {
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static ConnexionBd sqlConnect;
+
+    public static ConnexionBd getSQlConnect() throws SQLException{
+        sqlConnect.connect("localhost", "SAE_RESEAUX", "temha", "temha1011");
+        return sqlConnect;
     }
 }
