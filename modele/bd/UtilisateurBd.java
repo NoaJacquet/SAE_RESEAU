@@ -16,7 +16,7 @@ public class UtilisateurBd {
             PreparedStatement ps = Client.getSQlConnect().prepareStatement("SELECT * FROM UTILISATEUR");
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
-                utilisateurs.add(new Utilisateur(rs.getInt("id"), rs.getString("pseudo"), rs.getString("mot_de_passe")));
+                utilisateurs.add(new Utilisateur(rs.getInt("id_U"), rs.getString("pseudo"),rs.getString("email"),rs.getString("mdp")));
             }
             return utilisateurs;
         }

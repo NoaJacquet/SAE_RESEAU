@@ -1,35 +1,49 @@
--- create databases if not exists SAE_RESEAUX;
--- use SAE_RESEAUX
+CREATE DATABASE IF NOT EXISTS SAE_RESEAUX;
+USE SAE_RESEAUX;
 
+DROP TABLE IF EXISTS LIKES;
+DROP TABLE IF EXISTS MESSAGES;
+DROP TABLE IF EXISTS AMIS;
+DROP TABLE IF EXISTS UTILISATEUR;
 
-
-create table UTILISATEUR(
-    id_U int not null;
-    pseudo varchar(100);
-    email varchar(100);
-    mdp varchar(100);
-    primary key (id_U);
+CREATE TABLE UTILISATEUR (
+    id_U INT NOT NULL,
+    pseudo VARCHAR(100),
+    email VARCHAR(100),
+    mdp VARCHAR(100),
+    PRIMARY KEY (id_U),
+    UNIQUE (pseudo),
+    UNIQUE (email)
 );
 
-create table AMIS(
-    suiveur int not null;
-    suivi int not null;
-    foreign key (suiveur) references UTILISATEUR(id_U);
-    foreign key (suivi) references UTILISATEUR(id_U);
-    primary key (suiveur, suivi);
+CREATE TABLE AMIS (
+    suiveur INT NOT NULL,
+    suivi INT NOT NULL,
+    FOREIGN KEY (suiveur) REFERENCES UTILISATEUR(id_U),
+    FOREIGN KEY (suivi) REFERENCES UTILISATEUR(id_U),
+    PRIMARY KEY (suiveur, suivi)
 );
-create table MESSAGE(
-    id_M int not null;
-    id_U int not null;
-    contenu varchar(100);
-    date DATETIME;
-    foreign key (id_U) references UTILISATEUR(id_U);
-    primary key (id_M);
+
+CREATE TABLE MESSAGES (
+    id_M INT NOT NULL,
+    id_U INT NOT NULL,
+    contenu VARCHAR(100),
+    date DATETIME,
+    FOREIGN KEY (id_U) REFERENCES UTILISATEUR(id_U),
+    PRIMARY KEY (id_M)
 );
-create table LIKE(
-    id_M int not null;
-    id_U int not null;
-    foreign key (id_M) references MESSAGE(id_M);
-    foreign key (id_U) references UTILISATEUR(id_U);
-    primary key (id_M, id_U);
+
+CREATE TABLE LIKES (
+    id_M INT NOT NULL,
+    id_U INT NOT NULL,
+    FOREIGN KEY (id_M) REFERENCES MESSAGES(id_M),
+    FOREIGN KEY (id_U) REFERENCES UTILISATEUR(id_U),
+    PRIMARY KEY (id_M, id_U)
 );
+
+-- Insertion
+
+INSERT INTO UTILISATEUR VALUES (1, 'ahmet', 'ahmet@gmail.com', 'ahmet');
+INSERT INTO UTILISATEUR VALUES (2, 'noa', 'noa@gmail.com', 'noa');
+INSERT INTO AMIS VALUES (1, 2);
+INSERT INTO MESSAGES VALUES (1, 1, 'je teste', '2024-01-10 09:30:00');
