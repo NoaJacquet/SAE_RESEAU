@@ -45,5 +45,6 @@ CREATE TABLE LIKES (
 
 INSERT INTO UTILISATEUR VALUES (1, 'ahmet', 'ahmet@gmail.com', 'ahmet');
 INSERT INTO UTILISATEUR VALUES (2, 'noa', 'noa@gmail.com', 'noa');
+INSERT INTO UTILISATEUR VALUES (3, 'test','test','test');
 INSERT INTO AMIS VALUES (1, 2);
 INSERT INTO MESSAGES VALUES (1, 1, 'je teste', '2024-01-10 09:30:00');

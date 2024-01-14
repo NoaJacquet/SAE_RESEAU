@@ -15,14 +15,17 @@ public class ConnexionBd {
     public ConnexionBd() throws ClassNotFoundException{
         this.connection = null;
         this.isConnected = false;
-		Class.forName("org.mariadb.jdbc.Driver");
 	}
 
 	public void connect(String nomServeur, String nomBase, String nomLogin, String motDePasse) throws SQLException {
 		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
 			this.connection = DriverManager.getConnection("jdbc:mysql://"+nomServeur+":3306/"+nomBase,nomLogin,motDePasse);
 		} catch ( SQLException ex ) {
-			System.out.println("Msg : " + ex.getMessage() + ex.getErrorCode());
+			System.out.println("Msg : " + ex.getMessage() + "   " + ex.getErrorCode());
+		}
+		catch(ClassNotFoundException ex){
+			System.out.println("Msg : " + ex.getMessage());
 		}
 		this.isConnected = this.connection != null;
 	}
