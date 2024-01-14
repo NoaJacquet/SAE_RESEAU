@@ -128,6 +128,6 @@ public class PagePrincipale {
     }
     
     public static void afficheMessage(String message){
-        messageArea.appendText(message+"\n");
+        messageArea.setText(message + "\n" + messageArea.getText());
     }
 }

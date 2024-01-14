@@ -57,18 +57,25 @@ public class MessageBd {
 
         try {
             // Requête SQL avec LEFT JOIN pour récupérer les messages des amis
-            String sqlQuery = "SELECT M.id_M, M.id_U, M.contenu, M.date,U.pseudo FROM MESSAGES M NATURAL JOIN UTILISATEUR U LEFT JOIN AMIS A ON U.id_U = A.suivi WHERE U.pseudo = ? OR A.suivi = ? ORDER BY M.date"; 
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("select id_M,id_U,contenu,date,pseudo from MESSAGES natural join UTILISATEUR where pseudo=?");
 
-            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement(sqlQuery);
+            PreparedStatement ps2 = Main.getInstance().getSqlConnect().prepareStatement("select id_M,id_U,contenu,date,pseudo from MESSAGES natural join UTILISATEUR join AMIS on AMIS.suiveur= UTILISATEUR.id_U where AMIS.suivi in (select id_U from UTILISATEUR where pseudo=?)");
             ps.setString(1, pseudo);
-            ps.setString(2, pseudo);
-
+            ps2.setString(1, pseudo);
             ResultSet rs = ps.executeQuery();
-
+            ResultSet rs2 = ps2.executeQuery();
             while (rs.next()) {
-                messages.add(new Message(rs.getInt("id_M"), rs.getInt("id_U"), rs.getString("contenu"), rs.getString("date"), rs.getString("pseudo")));
+                Message message = new Message(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5));
+                messages.add(message);
+                
             }
-        } catch (SQLException e) {
+            while (rs2.next()) {
+                Message message = new Message(rs2.getInt(1), rs2.getInt(2), rs2.getString(3), rs2.getString(4), rs2.getString(5));
+                messages.add(message);
+                
+            }
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
         }
 

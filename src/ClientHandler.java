@@ -147,16 +147,24 @@ public class ClientHandler extends Thread{
                     
                 // Ajoutez la date au message et l'affiche dans le panneau
                 String messageWithDate = formattedDate + " "+ pseudoClient +" : "+ recipientMessage;
-                
-                try {
-                    MessageBd.ajouteMessage(pseudoClient, messageWithDate);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
                 recipientWriter.println(messageWithDate);
             }
             PrintWriter recipientWriter = clients.get(pseudoClient);
-            recipientWriter.println(pseudoClient +" : "+ recipientMessage);
+            LocalDateTime now = LocalDateTime.now();
+                    
+            // Formatte la date selon le format de votre choix
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = now.format(formatter);
+                
+            // Ajoutez la date au message et l'affiche dans le panneau
+            String messageWithDate = formattedDate + " "+ pseudoClient +" : "+ recipientMessage;
+            
+            try {
+                MessageBd.ajouteMessage(pseudoClient, recipientMessage);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            recipientWriter.println(messageWithDate);
         
         }
     }
