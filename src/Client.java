@@ -13,8 +13,9 @@ public class Client {
     private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 5555;
 
-    private static List<String> amis = new ArrayList<>();
-    private static List<String> nonAmis= new ArrayList<>();
+    private static List<String> EnvoyerMassage = new ArrayList<>();
+    private static List<String> RecevoirMessage= new ArrayList<>();
+    private static List<String> NonSuivi= new ArrayList<>();
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
@@ -25,10 +26,10 @@ public class Client {
         this.pseudoClient = pseudo;
         List<modele.code.Utilisateur> liste;
                 try {
-                    liste = AmisBd.ListeAmis(pseudo);
+                    liste = AmisBd.RecevoirMessage(pseudo);
                     for (modele.code.Utilisateur utilisateur : liste) {
                         System.out.println("amis : "+utilisateur.getPseudo());
-                        amis.add(utilisateur.getPseudo());
+                        RecevoirMessage.add(utilisateur.getPseudo());
                     }
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
@@ -36,15 +37,22 @@ public class Client {
 
                 List<modele.code.Utilisateur> liste2;
                 try {
-                    liste2 = AmisBd.ListeNonAmis(pseudo);
+                    liste2 = AmisBd.EnvoyerMessage(pseudo);
                     for (modele.code.Utilisateur utilisateur : liste2) {
-                        System.out.println("non amis : "+utilisateur.getPseudo());
-                        nonAmis.add(utilisateur.getPseudo());
+                        EnvoyerMassage.add(utilisateur.getPseudo());
                     }
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-
+                List<modele.code.Utilisateur> liste3;
+                try {
+                    liste3 = AmisBd.NonSuivi(pseudo);
+                    for (modele.code.Utilisateur utilisateur : liste3) {
+                        NonSuivi.add(utilisateur.getPseudo());
+                    }
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
         for (Message m:MessageBd.recupererLesMessageDeTousSesAmisDansOrdreDate(pseudo)){
             String s = m.getDate()+" "+m.getPseudo()+" : "+m.getContenu();
             PagePrincipale.afficheMessage(s);
@@ -71,7 +79,14 @@ public class Client {
                     try {
                         String serverMessage;
                         while ((serverMessage = this.in.readLine()) != null) {
-                            PagePrincipale.afficheMessage(serverMessage);
+                            for (String s:RecevoirMessage){
+                                if (serverMessage.contains(s)){
+                                    PagePrincipale.afficheMessage(serverMessage);
+                                }
+                            }
+                            if (serverMessage.contains(pseudoClient)){
+                                PagePrincipale.afficheMessage(serverMessage);
+                            }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -88,47 +103,33 @@ public class Client {
         this.out.println(message);
     }
 
-    public void lireMessage(){
-            new Thread(() -> {
-                String serverMessage;
-                try {
-                    while ((serverMessage = this.in.readLine()) != null) {
 
-                    PagePrincipale.afficheMessage(serverMessage);
 
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-    }
-
-    public void ajouteAmis(String pseudo) throws ClassNotFoundException{
-        amis.add(pseudo);
+    public void Suivre(String pseudo) throws ClassNotFoundException{
+        RecevoirMessage.add(pseudo);
         AmisBd.ajouteAmis(this.pseudoClient, pseudo);
-        System.out.println("ajoute amis : "+pseudo);
         sendMessage("/follow "+pseudo);
-        if (nonAmis.contains(pseudo)){
-            nonAmis.remove(pseudo);
+        if (NonSuivi.contains(pseudo)){
+            NonSuivi.remove(pseudo);
         }
 
     }
 
     public void supprimeAmis(String pseudo) throws ClassNotFoundException{
-        amis.remove(pseudo);
+        RecevoirMessage.remove(pseudo);
         AmisBd.supprimeAmis(this.pseudoClient, pseudo);
         System.out.println("supprime amis : "+pseudo);
         sendMessage("/unfollow "+pseudo);
-        if (!nonAmis.contains(pseudo)){
-            nonAmis.add(pseudo);
+        if (!NonSuivi.contains(pseudo)){
+            NonSuivi.add(pseudo);
         }
     }
 
-    public List<String> getAmis(){
-        return amis;
+    public List<String> getRecevoirMessage(){
+        return RecevoirMessage;
     }
 
-    public List<String> getNonAmis(){
-        return nonAmis;
+    public List<String> getNonSuivi(){
+        return NonSuivi;
     }
 }

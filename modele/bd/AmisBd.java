@@ -10,10 +10,10 @@ import modele.code.Utilisateur;
 
 public class AmisBd {
     private AmisBd() {}
-    public static List<Utilisateur> ListeAmis(String pseudo) throws ClassNotFoundException{
+    public static List<Utilisateur> RecevoirMessage(String pseudo) throws ClassNotFoundException{
         List<Utilisateur> utilisateurs = new ArrayList<>();
         try{
-            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM AMIS join UTILISATEUR on AMIS.suivi = UTILISATEUR.id_U where suiveur = (select id_U from UTILISATEUR where pseudo=?)");
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM AMIS join UTILISATEUR on AMIS.suivi = UTILISATEUR.id_U where AMIS.suiveur = (select id_U from UTILISATEUR where pseudo=?)");
             ps.setString(1, pseudo);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
@@ -21,6 +21,43 @@ public class AmisBd {
             }
             return utilisateurs;
         }
+        catch(SQLException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<Utilisateur> EnvoyerMessage(String pseudo) throws ClassNotFoundException{
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM AMIS join UTILISATEUR on AMIS.suiveur = UTILISATEUR.id_U where AMIS.suivi = (select id_U from UTILISATEUR where pseudo=?)");
+            ps.setString(1, pseudo);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                utilisateurs.add(new Utilisateur(rs.getInt("id_U"), rs.getString("pseudo"),rs.getString("email"),rs.getString("mdp")));
+            }
+            return utilisateurs;
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    public static List<Utilisateur> NonSuivi(String pseudo) throws ClassNotFoundException{
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM UTILISATEUR U WHERE U.id_U != (SELECT id_U FROM UTILISATEUR WHERE pseudo = ?) AND U.id_U NOT IN (SELECT A.suivi FROM AMIS A WHERE A.suiveur = (SELECT id_U FROM UTILISATEUR WHERE pseudo = ?))");            
+            ps.setString(1, pseudo);
+            ps.setString(2, pseudo);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                utilisateurs.add(new Utilisateur(rs.getInt("id_U"), rs.getString("pseudo"),rs.getString("email"),rs.getString("mdp")));
+            }
+            return utilisateurs;
+        }
+        
         catch(SQLException e){
             e.printStackTrace();
             return null;

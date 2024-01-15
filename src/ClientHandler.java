@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import modele.bd.AmisBd;
 import modele.bd.MessageBd;
+import modele.bd.UtilisateurBd;
 import modele.code.Utilisateur;
 
 public class ClientHandler extends Thread{
@@ -19,7 +20,10 @@ public class ClientHandler extends Thread{
     private PrintWriter ecrire;
     private String pseudoClient;
     private Map<String, PrintWriter> clients;
-    private List<String> amis= new ArrayList<>();
+    private static List<String> EnvoyerMassage = new ArrayList<>();
+    private static List<String> RecevoirMessage= new ArrayList<>();
+    private static List<String> NonSuivi= new ArrayList<>();
+
 
     public ClientHandler(Socket socket,Map<String, PrintWriter> clients) {
         this.clientSocket = socket;
@@ -32,10 +36,27 @@ public class ClientHandler extends Thread{
             clients.put(pseudoClient, this.ecrire);   // Enregistrer le pseudoClient et le flux de sortie du client
             
             try {
-                for (Utilisateur u:AmisBd.ListeAmis(pseudoClient)){
-                    amis.add(u.getPseudo());
+                for (Utilisateur u:AmisBd.RecevoirMessage(pseudoClient)){
+                    RecevoirMessage.add(u.getPseudo());
                 }
-            } catch (ClassNotFoundException e) {
+            } 
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            try {
+                for (Utilisateur u:AmisBd.EnvoyerMessage(pseudoClient)){
+                    EnvoyerMassage.add(u.getPseudo());
+                }
+            } 
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            try {
+                for (Utilisateur u:AmisBd.NonSuivi(pseudoClient)){
+                    NonSuivi.add(u.getPseudo());
+                }
+            } 
+            catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
             System.out.println(pseudoClient + " est connecté.");
@@ -86,7 +107,7 @@ public class ClientHandler extends Thread{
                     if (pseudo.equals(recipientMessage[1])) {
                         PrintWriter recipientWriter = clients.get(pseudo);
                         recipientWriter.println(pseudoClient + " vous suit");
-                        amis.add(recipientMessage[1]);
+                        RecevoirMessage.add(recipientMessage[1]);
                     }
                     if (pseudo.equals(pseudoClient)) {
                         PrintWriter recipientWriter = clients.get(pseudo);
@@ -102,7 +123,7 @@ public class ClientHandler extends Thread{
                     if (pseudo.equals(recipientMessage[1])) {
                         PrintWriter recipientWriter = clients.get(pseudo);
                         recipientWriter.println(pseudoClient + " ne vous suit plus");
-                        amis.remove(recipientMessage[1]);
+                        RecevoirMessage.remove(recipientMessage[1]);
                     }
                     if (pseudo.equals(pseudoClient)) {
                         PrintWriter recipientWriter = clients.get(pseudo);
@@ -115,56 +136,34 @@ public class ClientHandler extends Thread{
 
         else{
             String recipientMessage = message;
-            if (amis.isEmpty()){
-                PrintWriter recipientWriter = clients.get(pseudoClient);                
-                LocalDateTime now = LocalDateTime.now();
-                    
-                // Formatte la date selon le format de votre choix
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDate = now.format(formatter);
-                    
-                // Ajoutez la date au message et l'affiche dans le panneau
-                String messageWithDate = formattedDate + " "+ pseudoClient +" : "+ recipientMessage;
-                
-                try {
-                    MessageBd.ajouteMessage(pseudoClient, messageWithDate);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+            List<String> utilisateurs = new ArrayList<>();
+            try {
+                for (Utilisateur u:UtilisateurBd.AllUtilisateur())
+                {
+                    utilisateurs.add(u.getPseudo());
                 }
-                recipientWriter.println(messageWithDate);
-                return;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
-            for (String pseudo : amis) {
+            for (String pseudo : utilisateurs) {
                 PrintWriter recipientWriter = clients.get(pseudo);
-
-
-
-                LocalDateTime now = LocalDateTime.now();
+                if (recipientWriter != null){
+                    LocalDateTime now = LocalDateTime.now();
                     
-                // Formatte la date selon le format de votre choix
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDate = now.format(formatter);
-                    
-                // Ajoutez la date au message et l'affiche dans le panneau
-                String messageWithDate = formattedDate + " "+ pseudoClient +" : "+ recipientMessage;
-                recipientWriter.println(messageWithDate);
+                    // Formatte la date selon le format de votre choix
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String formattedDate = now.format(formatter);
+                        
+                    // Ajoutez la date au message et l'affiche dans le panneau
+                    String messageWithDate = formattedDate + " "+ pseudoClient +" : "+ recipientMessage;
+                    recipientWriter.println(messageWithDate);
+                }
             }
-            PrintWriter recipientWriter = clients.get(pseudoClient);
-            LocalDateTime now = LocalDateTime.now();
-                    
-            // Formatte la date selon le format de votre choix
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String formattedDate = now.format(formatter);
-                
-            // Ajoutez la date au message et l'affiche dans le panneau
-            String messageWithDate = formattedDate + " "+ pseudoClient +" : "+ recipientMessage;
-            
             try {
                 MessageBd.ajouteMessage(pseudoClient, recipientMessage);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            recipientWriter.println(messageWithDate);
         
         }
     }

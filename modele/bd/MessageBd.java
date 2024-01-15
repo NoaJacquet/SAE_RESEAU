@@ -59,7 +59,7 @@ public class MessageBd {
             // Requête SQL avec LEFT JOIN pour récupérer les messages des amis
             PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("select id_M,id_U,contenu,date,pseudo from MESSAGES natural join UTILISATEUR where pseudo=?");
 
-            PreparedStatement ps2 = Main.getInstance().getSqlConnect().prepareStatement("select id_M,id_U,contenu,date,pseudo from MESSAGES natural join UTILISATEUR join AMIS on AMIS.suiveur= UTILISATEUR.id_U where AMIS.suivi in (select id_U from UTILISATEUR where pseudo=?)");
+            PreparedStatement ps2 = Main.getInstance().getSqlConnect().prepareStatement("SELECT M.id_M,M.id_U,M.contenu,M.date,U.pseudo FROM MESSAGES M JOIN AMIS A ON M.id_U = A.suivi JOIN UTILISATEUR U ON M.id_U = U.id_U WHERE A.suiveur = (SELECT id_U FROM UTILISATEUR WHERE pseudo = ?) ORDER BY M.date DESC");
             ps.setString(1, pseudo);
             ps2.setString(1, pseudo);
             ResultSet rs = ps.executeQuery();

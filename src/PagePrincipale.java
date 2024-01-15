@@ -48,7 +48,7 @@ public class PagePrincipale {
             if (isAmi) {
                 client.supprimeAmis(friendName);
             } else {
-                client.ajouteAmis(friendName);
+                client.Suivre(friendName);
             }
         }
     
@@ -91,14 +91,14 @@ public class PagePrincipale {
         BorderPane borderPane = new BorderPane();
         // liste non amis
         // Affichage des non-amis
-        for (String string : client.getNonAmis()) {
+        for (String string : client.getNonSuivi()) {
             HBox interieur = createFriendDisplay(string, client, false);
             listeNonAmis.getChildren().add(interieur);
         }
         borderPane.setLeft(listeNonAmis);
 
         // Affichage des amis
-        for (String string : client.getAmis()) {
+        for (String string : client.getRecevoirMessage()) {
             HBox interieur = createFriendDisplay(string, client, true);
             Amis.getChildren().add(interieur);
         }
