@@ -41,6 +41,15 @@ CREATE TABLE LIKES (
     PRIMARY KEY (id_M, id_U)
 );
 
+CREATE TABLE DISLIKES(
+    id_M INT NOT NULL,
+    id_U INT NOT NULL,
+    FOREIGN KEY (id_M) REFERENCES MESSAGES(id_M),
+    FOREIGN KEY (id_U) REFERENCES UTILISATEUR(id_U),
+    PRIMARY KEY (id_M, id_U)
+);
+
+
 -- Insertion
 
 INSERT INTO UTILISATEUR VALUES (1, 'ahmet', 'ahmet@gmail.com', 'ahmet');
