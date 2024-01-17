@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import modele.bd.AmisBd;
+import modele.bd.LikeBd;
 import modele.bd.MessageBd;
 import modele.code.Message;
 
@@ -131,5 +132,11 @@ public class Client {
 
     public List<String> getNonSuivi(){
         return NonSuivi;
+    }
+
+    public void like(String message) throws ClassNotFoundException{
+        Message m=MessageBd.recupererMessage(message);
+        LikeBd.ajouteLike(m.getIdMessage(), this.pseudoClient);
+        sendMessage("/like "+m.getIdMessage());
     }
 }

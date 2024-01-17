@@ -1,4 +1,5 @@
 package src;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -10,11 +11,11 @@ import javafx.stage.Stage;
 public class PagePrincipale {
     private Stage stage;
     
-    private Client client;
+    private static Client client;
     private VBox listeNonAmis = new VBox();
     private VBox Amis = new VBox();
-    private static TextArea messageArea = new TextArea();
-    
+    private static  VBox messageArea = new VBox();
+    private ScrollPane splitPane = new ScrollPane();
 
     public PagePrincipale(Stage stage,Client client) {
         this.stage = stage;
@@ -22,7 +23,7 @@ public class PagePrincipale {
         stage.setTitle("Page principale");
         this.listeNonAmis.getChildren().addAll(new Label("Non amis"));
         Amis.getChildren().addAll(new Label("amis"));
-        messageArea.setEditable(false);
+       
     }
 
 
@@ -119,15 +120,27 @@ public class PagePrincipale {
         borderPane.setBottom(messageBox);
 
         // Panel au centre avec la zone des messages
-        
-        borderPane.setCenter(messageArea);
+        //splitPane.add(messageArea);
+        splitPane.setContent(messageArea);
+        borderPane.setCenter(splitPane);
 
         Scene scene = new Scene(borderPane, 800, 600);
         stage.setScene(scene);
         stage.show();
     }
     
-    public static void afficheMessage(String message){
-        messageArea.setText(message + "\n" + messageArea.getText());
-    }
+public static void afficheMessage(String message) {
+    Platform.runLater(() -> {
+        HBox hbox = new HBox();
+        TextArea marea = new TextArea();
+        marea.setText(message);
+        marea.setEditable(false);
+        Button button = new Button("Like");
+        hbox.getChildren().addAll(marea, button);
+        messageArea.getChildren().add(hbox);
+    });
+}
+
+    
+
 }

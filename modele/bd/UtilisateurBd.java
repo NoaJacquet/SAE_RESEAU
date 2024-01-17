@@ -45,4 +45,21 @@ public class UtilisateurBd {
         }
 
     }
+    public static Utilisateur recupererUtilisateur(String pseudo) throws ClassNotFoundException{
+        try {
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM UTILISATEUR WHERE pseudo = ?");
+            ps.setString(1, pseudo);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                return new Utilisateur(rs.getInt("id_U"), rs.getString("pseudo"),rs.getString("email"),rs.getString("mdp"));
+            }
+            else{
+                return null;
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -44,4 +44,16 @@ public class LikeBd {
             return 0;
         }
     }
+
+    public static void ajouteLike(int id, String pseudoClient) throws ClassNotFoundException{
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("INSERT INTO LIKE VALUES (?,(SELECT id_U FROM UTILISATEUR WHERE pseudo =?))");
+            ps.setInt(1, id);
+            ps.setString(2, pseudoClient);
+            ps.executeUpdate();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+    }
 }
