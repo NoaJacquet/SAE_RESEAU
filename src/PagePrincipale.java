@@ -12,15 +12,24 @@ import modele.bd.LikeBd;
 import modele.bd.MessageBd;
 import modele.code.Message;
 
+/**
+ * La classe PagePrincipale représente la page principale de l'application. Elle affiche une interface utilisateur
+ * permettant à l'utilisateur de voir les messages de ses amis et d'envoyer des messages.
+ */
 public class PagePrincipale {
     private Stage stage;
-    
     private static Client client;
     private VBox listeNonAmis = new VBox();
     private VBox Amis = new VBox();
     private static  VBox messageArea = new VBox();
-    private ScrollPane splitPane = new ScrollPane();
+    private ScrollPane scrollPane = new ScrollPane();
 
+    /**
+     * Constructeur de la classe PagePrincipale.
+     *
+     * @param stage Le stage JavaFX sur lequel afficher la page.
+     * @param client Le client connecté.
+     */
     public PagePrincipale(Stage stage,Client client) {
         this.stage = stage;
         this.client=client;
@@ -30,7 +39,14 @@ public class PagePrincipale {
        
     }
 
-
+    /**
+     * Crée un affichage pour un ami.
+     *
+     * @param friendName Le nom de l'ami.
+     * @param client Le client connecté.
+     * @param isAmi Si l'ami est un ami ou non.
+     * @return Un affichage pour un ami.
+     */
     private HBox createFriendDisplay(String friendName, Client client, boolean isAmi) {
             HBox interieur = new HBox();
             Label label = new Label(friendName);
@@ -49,49 +65,67 @@ public class PagePrincipale {
             return interieur;
         }
 
-        private void handleFriendAction(String friendName, Client client, boolean isAmi) throws ClassNotFoundException {
-            if (isAmi) {
-                client.supprimeAmis(friendName);
-            } else {
-                client.Suivre(friendName);
-            }
+    /**
+     * Gère l'action d'ajout ou de suppression d'un ami.
+     * @param friendName Le nom de l'ami.
+     * @param client Le client connecté.
+     * @param isAmi Si l'ami est un ami ou non.
+     * @throws ClassNotFoundException En cas d'erreur lors de l'accès à la base de données.
+     */
+    private void handleFriendAction(String friendName, Client client, boolean isAmi) throws ClassNotFoundException {
+        if (isAmi) {
+            client.supprimeAmis(friendName);
+        } else {
+            client.Suivre(friendName);
         }
+    }
     
-        private void updateFriendDisplay(HBox container, String friendName, Client client, boolean isAmi) {
-            container.getChildren().clear();
-            Label label = new Label(friendName);
-            Button button = new Button();
-            
-            if (isAmi) {
-                button.setText("Supprimer");
-                button.setOnAction(e -> {
-                    try {
-                        handleFriendAction(friendName, client, true);
-                        updateFriendDisplay(container, friendName, client, false);
-                    } catch (ClassNotFoundException ex) {
-                        ex.printStackTrace();
-                    }
-                });
-                Amis.getChildren().add(container);
-                listeNonAmis.getChildren().remove(container);
-            } else {
-                button.setText("Ajouter");
-                button.setOnAction(e -> {
-                    try {
-                        handleFriendAction(friendName, client, false);
-                        updateFriendDisplay(container, friendName, client, true);
-                    } catch (ClassNotFoundException ex) {
-                        ex.printStackTrace();
-                    }
-                });
-                listeNonAmis.getChildren().add(container);
-                Amis.getChildren().remove(container);
-            }
-    
-            container.getChildren().addAll(label, button);
+    /**
+     * Met à jour l'affichage d'un ami.
+     * @param container Le conteneur de l'affichage.
+     * @param friendName Le nom de l'ami.
+     * @param client Le client connecté.
+     * @param isAmi Si l'ami est un ami ou non.
+     * @throws ClassNotFoundException En cas d'erreur lors de l'accès à la base de données.
+     */
+    private void updateFriendDisplay(HBox container, String friendName, Client client, boolean isAmi) {
+        container.getChildren().clear();
+        Label label = new Label(friendName);
+        Button button = new Button();
+        
+        if (isAmi) {
+            button.setText("Supprimer");
+            button.setOnAction(e -> {
+                try {
+                    handleFriendAction(friendName, client, true);
+                    updateFriendDisplay(container, friendName, client, false);
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            Amis.getChildren().add(container);
+            listeNonAmis.getChildren().remove(container);
+        } else {
+            button.setText("Ajouter");
+            button.setOnAction(e -> {
+                try {
+                    handleFriendAction(friendName, client, false);
+                    updateFriendDisplay(container, friendName, client, true);
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            listeNonAmis.getChildren().add(container);
+            Amis.getChildren().remove(container);
         }
-    
 
+        container.getChildren().addAll(label, button);
+    }
+    
+    /**
+     * Affiche la page principale.
+     * @throws ClassNotFoundException En cas d'erreur lors de l'accès à la base de données.
+     */
     public void show() throws ClassNotFoundException {
         BorderPane borderPane = new BorderPane();
         // liste non amis
@@ -124,18 +158,23 @@ public class PagePrincipale {
         borderPane.setBottom(messageBox);
 
         // Panel au centre avec la zone des messages
-        //splitPane.add(messageArea);
-        splitPane.setContent(messageArea);
-        borderPane.setCenter(splitPane);
+        //scrollPane.add(messageArea);
+        scrollPane.setContent(messageArea);
+        borderPane.setCenter(scrollPane);
 
         Scene scene = new Scene(borderPane, 850, 600);
         stage.setScene(scene);
         stage.show();
     }
     
+
+    /**
+     * Affiche un message dans la zone de messages.
+     * @param message Le message à afficher.
+     */
     public static void afficheMessage(String message) {
         // Déclarez un tableau pour stocker la valeur de nbLike
-        int[] nbLikeArray = new int[1];
+        int[] nbLikeArray = new int[2];
         System.out.println("afficheMessage: " + message);
         Platform.runLater(new Runnable() {
             @Override
@@ -162,10 +201,13 @@ public class PagePrincipale {
                     }
                     Message m = null;
                     int userLikeMessage = 0;
+                    int userDislikeMessage = 0;
                     try {
                         m = MessageBd.recupererMessage(date, pseudo, contenu);
                         nbLikeArray[0] = LikeBd.countLikeToMessage(m.getIdMessage());
+                        nbLikeArray[1] = LikeBd.countDisikeToMessage(m.getIdMessage());
                         userLikeMessage = LikeBd.countLikeToMessageByUser(m.getIdMessage(), client.getIdUser());
+                        userDislikeMessage = LikeBd.countDislikeToMessageByUser(m.getIdMessage(), client.getIdUser());
         
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
@@ -174,9 +216,11 @@ public class PagePrincipale {
     
                     HBox hbox = new HBox();
                     TextArea marea = new TextArea();
-                    marea.setText("Date : " + date + "\n" + "Pseudo : " + pseudo + "\n" + contenu + "\n" + "Nombre de like : " + nbLikeArray[0]);
+                    marea.setText("Date : " + date + "\n" + "Pseudo : " + pseudo + "\n" + contenu + "\n" + "Nombre de like : " + nbLikeArray[0] + "\n" + "Nombre de dislike : " + nbLikeArray[1]);
+                    
                     marea.setEditable(false);
                     Button button = new Button("Like");
+                    Button button2 = new Button("Dislike");
                     final String finalContenu = contenu;
                     final Message finalM = m;
                     final String finalPseudo = pseudo;
@@ -189,7 +233,20 @@ public class PagePrincipale {
                             // Récupérez le nombre de likes mis à jour après le "Like"
                             nbLikeArray[0] = LikeBd.countLikeToMessage(finalM.getIdMessage());
                             marea.setText("Date : " + finalDate + "\n" + "Pseudo : " + finalPseudo + "\n" + finalContenu + "\n" + "Nombre de like : " + nbLikeArray[0]);
+                            // Récupérez le nombre de likes mis à jour après le "Like"
+                        } catch (ClassNotFoundException e1) {
+                            e1.printStackTrace();
+                        }
+                    });
+                    button2.setOnAction(e -> {
+                        try {
+                            client.dislike(finalDate,finalPseudo, finalContenu);
+                            button2.setDisable(true);
     
+                            // Récupérez le nombre de likes mis à jour après le "Like"
+                            nbLikeArray[1] = LikeBd.countDisikeToMessage(finalM.getIdMessage());
+                            marea.setText("Date : " + finalDate + "\n" + "Pseudo : " + finalPseudo + "\n" + finalContenu + "\n" + "Nombre de dislike : " + nbLikeArray[1]);
+                            // Récupérez le nombre de likes mis à jour après le "Like"
                         } catch (ClassNotFoundException e1) {
                             e1.printStackTrace();
                         }
@@ -197,8 +254,8 @@ public class PagePrincipale {
                     if (userLikeMessage != 0) {
                         button.setDisable(true);
                     }
-                    hbox.getChildren().addAll(marea, button);
-                    messageArea.getChildren().add(hbox);
+                    hbox.getChildren().addAll(marea, button, button2);
+                    messageArea.getChildren().add(0, hbox);
 
                 }
             }
@@ -206,32 +263,28 @@ public class PagePrincipale {
     }
 
 
+    /**
+     * Met à jour l'affichage d'un message.
+     * @param message Le message à mettre à jour.
+     */
     public static void MettreAJourAffichage(String message){
-        String[] partsLikes = message.split("\\|\\|\\|");
-        //String[] partsLikes = message.split("\\|\\|\\|\\|");
+        String[] partsLikes = message.split("\\|\\|\\|"); // partsLikes[0] = "///like", partsLikes[1] = date, partsLikes[2] = pseudo, partsLikes[3] = contenu
         String date = partsLikes[1].trim();
         String pseudo = partsLikes[2].trim();
         String contenu = "";
         for (int i = 3; i < partsLikes.length; i++) {
             contenu = partsLikes[i].trim();
-        }
-        System.out.println("Date: " + date);
-        System.out.println("Pseudo: " + pseudo);
-        
-        for (Node node : messageArea.getChildren()) {
-            if (node instanceof HBox) {
+        }       
+        for (Node node : messageArea.getChildren()) { // Parcourir tous les noeuds dans messageArea
+            if (node instanceof HBox) { // Si le noeud est un HBox
                 HBox hbox = (HBox) node;
-                for (Node child : hbox.getChildren()) {
-                    if (child instanceof TextArea) {
+                for (Node child : hbox.getChildren()) { //  Parcourir tous les noeuds dans hbox
+                    if (child instanceof TextArea) { // Si le noeud est un TextArea
                         TextArea marea = (TextArea) child;
-
-                        System.out.println("Texte: " + marea.getText());
-                        System.out.println(marea.getText().contains(date)+" "+ date);
-                        System.out.println(marea.getText().contains(pseudo));
-                        if (marea.getText().contains(date) && marea.getText().contains(pseudo)) {
-                            System.out.println("On y est presque");
+                        if (marea.getText().contains(date) && marea.getText().contains(pseudo)) { // Si le contenu de marea contient la date et le pseudo
                             try {
-                                marea.setText("Date : " + date + "\n" + "Pseudo : " + pseudo + "\n" + contenu + "\n" + "Nombre de like : " + LikeBd.countLikeToMessage(MessageBd.recupererMessage(date, pseudo, contenu).getIdMessage()));
+                                marea.setText("Date : " + date + "\n" + "Pseudo : " + pseudo + "\n" + contenu + "\n" + "Nombre de like : " + LikeBd.countLikeToMessage(MessageBd.recupererMessage(date, pseudo, contenu).getIdMessage())+"\n"+"Nombre de dislike : "+LikeBd.countDisikeToMessage(MessageBd.recupererMessage(date, pseudo, contenu).getIdMessage())+"\n");
+                                // Récupérez le nombre de likes mis à jour après le "Like"
                             } catch (ClassNotFoundException e) {
                                 e.printStackTrace();
                             }

@@ -9,16 +9,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-
-
 import modele.bd.AmisBd;
-import modele.bd.LikeBd;
 import modele.bd.MessageBd;
 import modele.bd.UtilisateurBd;
 import modele.code.Utilisateur;
 import modele.code.Message;
 
+/**
+ * La classe ClientHandler gère les connexions des clients.
+ */
 public class ClientHandler extends Thread{
     private Socket clientSocket;
     private BufferedReader lire;
@@ -29,7 +28,12 @@ public class ClientHandler extends Thread{
     private static List<String> RecevoirMessage= new ArrayList<>();
     private static List<String> NonSuivi= new ArrayList<>();
 
-
+    /**
+     * Initialise un nouveau gestionnaire de client.
+     *
+     * @param socket  Le socket du client.
+     * @param clients La liste des clients connectés.
+     */
     public ClientHandler(Socket socket,Map<String, PrintWriter> clients) {
         this.clientSocket = socket;
         this.clients = clients;
@@ -71,6 +75,9 @@ public class ClientHandler extends Thread{
         }
     }
 
+    /**
+     * Exécute le thread du gestionnaire de client.
+     */
     @Override
     public void run() {
         try {
@@ -101,8 +108,15 @@ public class ClientHandler extends Thread{
             }
         }
     }
+
+    /**
+     * Diffuse un message à tous les clients connectés.
+     *
+     * @param message Le message à diffuser.
+     */
     private void broadcast(String message) {
         if (message.contains("/")){
+            // permet de gerer les evenement de like dislike follow unfollow
             String[] recipientMessage = message.split(" ");
             if (recipientMessage[0].equals("/follow")) {
                 follow(recipientMessage);
@@ -111,11 +125,12 @@ public class ClientHandler extends Thread{
             else if (recipientMessage[0].equals("/unfollow")){
                 unfollow(recipientMessage);
             }
-            else if(recipientMessage[0].equals("/like")){
-                liker(recipientMessage);
+            else if(recipientMessage[0].equals("/likeDislike")){
+                likerDislike(recipientMessage);
             }
         }
         else{
+            // permet d'envoyer les messages
             List<String> utilisateurs = new ArrayList<>();
             System.out.println("heheheh");
 
@@ -138,10 +153,10 @@ public class ClientHandler extends Thread{
                 if (recipientWriter != null){
                     LocalDateTime now = LocalDateTime.now();
 
-                    // Définissez le format de la date que vous souhaitez
+                    // pour le format de la date
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-                    // Formatez la date en chaîne de caractères selon le format spécifié
+                    // Formate la date en chaîne de caractères selon le format spécifié
                     String formattedDateTime = now.format(formatter);
 
                     String messageWithDate = formattedDateTime +"|||" + pseudoClient + "|||" + message;
@@ -151,38 +166,41 @@ public class ClientHandler extends Thread{
         }
     }
 
-    
+    /**
+     * Permet de follow un client et de recevoir ses messages.
+     *
+     * @param message Le message à envoyer.
+     */
     private void follow(String[] recipientMessage){
         for (String pseudo : clients.keySet()) {
             if (pseudo.equals(recipientMessage[1])) {
-                PrintWriter recipientWriter = clients.get(pseudo);
-                recipientWriter.println(pseudoClient + " vous suit");
                 RecevoirMessage.add(recipientMessage[1]);
-            }
-            if (pseudo.equals(pseudoClient)) {
-                PrintWriter recipientWriter = clients.get(pseudo);
-                recipientWriter.println("Vous suivez "+recipientMessage[1]);
             }
         }
         
         return;
     }
+
+    /**
+     * Permet de unfollow un client et de ne plus recevoir ses messages.
+     *
+     * @param message Le message à envoyer.
+     */
     private void unfollow(String[] recipientMessage){
         for (String pseudo : clients.keySet()) {
             if (pseudo.equals(recipientMessage[1])) {
-                PrintWriter recipientWriter = clients.get(pseudo);
-                recipientWriter.println(pseudoClient + " ne vous suit plus");
                 RecevoirMessage.remove(recipientMessage[1]);
-            }
-            if (pseudo.equals(pseudoClient)) {
-                PrintWriter recipientWriter = clients.get(pseudo);
-                recipientWriter.println("Vous ne suivez plus "+recipientMessage[1]);
             }
         }
         return;
     }
 
-    private void liker(String[] recipientMessage) {
+    /**
+     * Permet de liker ou disliker un message.
+     *
+     * @param message Le message à envoyer.
+     */
+    private void likerDislike(String[] recipientMessage) {
         String idMessage = recipientMessage[1];
         int id = Integer.parseInt(idMessage);
         Message message=null;
@@ -192,17 +210,21 @@ public class ClientHandler extends Thread{
             e.printStackTrace();
         }
         System.out.println("t"+message.getDate());
-        String messageWithDate = "///like"+"|||"+message.getDate() +"|||" + message.getPseudo() + "|||" + message.getContenu();
+        String messageWithDate = "///likeDislike"+"|||"+message.getDate() +"|||" + message.getPseudo() + "|||" + message.getContenu();
         
         envoieLike(messageWithDate);
     }
     
+    /**
+     * Permet d'envoyer un message à tous les clients connectés.
+     *
+     * @param message Le message à envoyer.
+     */
     private void envoieLike(String message) {
         List<String> utilisateurs = new ArrayList<>();
-        System.out.println("avant try");
         try {
-            System.out.println("try entrer");
-            for (Utilisateur u:UtilisateurBd.AllUtilisateur())
+            for (Utilisateur u:UtilisateurBd.AllUtilisateur()) 
+            // tous les client de la bd
             {
                 System.out.println("pseudo : "+u.getPseudo());
                 utilisateurs.add(u.getPseudo());
@@ -210,14 +232,10 @@ public class ClientHandler extends Thread{
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            System.out.println("err");
         }
-        System.out.println("utilisateurs : "+utilisateurs.size());
         for (String pseudo : utilisateurs) {
-            
             PrintWriter recipientWriter = clients.get(pseudo);
-            System.out.println("pseudo : "+pseudo+ (recipientWriter==null));
-            if (recipientWriter != null){
+            if (recipientWriter != null){  // on regarde si il est connecter
                 recipientWriter.println(message);
             }
         }

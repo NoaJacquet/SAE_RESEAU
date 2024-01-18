@@ -13,10 +13,19 @@ import java.util.List;
 import modele.code.Message;
 import src.Main;
 
+/**
+ * La classe MessageBd gère les opérations liées à la manipulation des messages dans la base de données.
+ */
 public class MessageBd{
         private MessageBd() {}
 
-
+    /**
+     * Ajoute un message dans la base de données avec le pseudo de l'utilisateur et le contenu du message.
+     *
+     * @param pseudo   Le pseudo de l'utilisateur.
+     * @param contenu  Le contenu du message.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
     public static void ajouteMessage(String pseudo, String contenu) throws ClassNotFoundException{
         try{
             PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("INSERT INTO MESSAGES  VALUES (?, (SELECT id_U FROM UTILISATEUR WHERE pseudo =?),?,?)");
@@ -37,6 +46,12 @@ public class MessageBd{
         }
     }
 
+    /**
+     * Récupère le prochain identifiant disponible pour un message.
+     *
+     * @return L'identifiant du prochain message.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
     private static int prochainId() throws ClassNotFoundException{
         try{
             PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT MAX(id_M) FROM MESSAGES");
@@ -54,6 +69,13 @@ public class MessageBd{
         return 0;
     }
 
+    /**
+     * Récupère les messages de tous les amis dans l'ordre de la date pour un utilisateur donné.
+     *
+     * @param pseudo Le pseudo de l'utilisateur.
+     * @return Une liste de messages triés par date dans l'ordre décroissant.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
     public static List<Message> recupererLesMessageDeTousSesAmisDansOrdreDate(String pseudo) throws ClassNotFoundException {
         List<Message> messages = new ArrayList<>();
 
@@ -89,7 +111,15 @@ public class MessageBd{
         return messages;
     }
 
-
+    /**
+     * Récupère un message spécifié par sa date, le pseudo de l'utilisateur et le contenu du message.
+     *
+     * @param date    La date du message.
+     * @param pseudo  Le pseudo de l'utilisateur.
+     * @param contenu Le contenu du message.
+     * @return Le message correspondant aux critères spécifiés.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
     public static Message recupererMessage(String date,String pseudo, String contenu) throws ClassNotFoundException{
         try{
             PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT id_M,id_U,contenu,date,pseudo FROM MESSAGES Natural join UTILISATEUR where pseudo=? and date=? and contenu=?");
@@ -109,6 +139,13 @@ public class MessageBd{
         return null;
     }
 
+    /**
+     * Récupère un message spécifié par son identifiant.
+     *
+     * @param id L'identifiant du message.
+     * @return Le message correspondant à l'identifiant spécifié.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
     public static Message recupererMessageById(int id) throws ClassNotFoundException{
         try{
             PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT id_M,id_U,contenu,date,pseudo FROM MESSAGES Natural join UTILISATEUR where id_M=?");

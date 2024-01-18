@@ -9,13 +9,25 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import modele.bd.UtilisateurBd;
 
+/**
+ * La classe LoginPage représente la page de connexion de l'application. Elle affiche une interface utilisateur
+ * permettant à l'utilisateur de saisir son nom d'utilisateur et son mot de passe pour se connecter à la base de données.
+ */
 public class LoginPage {
     private Stage stage;
 
+    /**
+     * Constructeur de la classe LoginPage.
+     *
+     * @param stage Le stage JavaFX sur lequel afficher la page.
+     */
     public LoginPage(Stage stage) {
         this.stage = stage;
     }
 
+    /**
+     * Affiche la page de connexion.
+     */
     public void show() {
         stage.setTitle("Connexion à la base de données");
 
@@ -48,6 +60,13 @@ public class LoginPage {
         stage.show();
     }
 
+
+    /**
+     * Gère l'événement du clic sur le bouton de connexion.
+     *
+     * @param username Le nom d'utilisateur saisi.
+     * @param password Le mot de passe saisi.
+     */
     private void handleButtonConnect(String username, String password) {
         try {
             // Effectuer la connexion à la base de données avec les informations de connexion
