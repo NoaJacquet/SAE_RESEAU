@@ -149,6 +149,9 @@ public class PagePrincipale {
         Button sendButton = new Button("Envoyer");
         sendButton.setOnAction(e -> {
             String message = messageInput.getText();
+            if (message.isEmpty() || message.equals("") || message.isBlank()) {
+                return;
+            }
             client.sendMessage(message);
             messageInput.clear();
         });
@@ -158,7 +161,7 @@ public class PagePrincipale {
         borderPane.setBottom(messageBox);
 
         // Panel au centre avec la zone des messages
-        //scrollPane.add(messageArea);
+
         scrollPane.setContent(messageArea);
         borderPane.setCenter(scrollPane);
 

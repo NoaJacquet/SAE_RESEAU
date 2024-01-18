@@ -90,4 +90,64 @@ public class UtilisateurBd {
             return null;
         }
     }
+
+
+    public static boolean ajouterUtilisateur(String pseudo, String email, String mdp) throws ClassNotFoundException{
+        try{
+            if(UtilisateurExiste(pseudo,email)){
+                return false;
+            }
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("INSERT INTO UTILISATEUR (id_U,pseudo, email, mdp) VALUES (?, ?, ?, ?)");
+            ps.setInt(1, getProchainId());
+            ps.setString(2, pseudo);
+            ps.setString(3, email);
+            ps.setString(4, mdp);
+            ps.executeUpdate();
+            return true;
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    private static int getProchainId() throws ClassNotFoundException{
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT MAX(id_U) FROM UTILISATEUR");
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                return rs.getInt(1) + 1;
+            }
+            else{
+                return 1;
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    private static boolean UtilisateurExiste(String pseudo,String mail) throws ClassNotFoundException{
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM UTILISATEUR WHERE pseudo = ?");
+            PreparedStatement ps2 = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM UTILISATEUR WHERE email = ?");
+            PreparedStatement ps3 = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM UTILISATEUR WHERE pseudo = ? AND email = ?");
+            ps.setString(1, pseudo);
+            ps2.setString(1, mail);
+            ps3.setString(1, pseudo);
+            ps3.setString(2, mail);
+            ResultSet rs = ps.executeQuery();
+            ResultSet rs2 = ps2.executeQuery();
+            ResultSet rs3 = ps3.executeQuery();
+            if(rs.next() || rs2.next() || rs3.next()){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

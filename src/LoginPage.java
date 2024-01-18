@@ -40,6 +40,8 @@ public class LoginPage {
 
         Button buttonConnect = new Button("Se connecter");
         buttonConnect.setOnAction(e -> handleButtonConnect(textFieldUsername.getText(), passwordField.getText()));
+        Button buttonCreateAccount = new Button("Créer un compte");
+        buttonCreateAccount.setOnAction(e -> openCreateAccountPage());
 
         // Mise en page avec GridPane
         GridPane gridPane = new GridPane();
@@ -52,8 +54,9 @@ public class LoginPage {
         GridPane.setConstraints(labelPassword, 0, 1);
         GridPane.setConstraints(passwordField, 1, 1);
         GridPane.setConstraints(buttonConnect, 1, 2);
+        GridPane.setConstraints(buttonCreateAccount, 0, 2);
 
-        gridPane.getChildren().addAll(labelUsername, textFieldUsername, labelPassword, passwordField, buttonConnect);
+        gridPane.getChildren().addAll(labelUsername, textFieldUsername, labelPassword, passwordField, buttonConnect,buttonCreateAccount);
 
         Scene scene = new Scene(gridPane, 400, 400);
         stage.setScene(scene);
@@ -89,5 +92,13 @@ public class LoginPage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Ouvre la page de création de compte.
+     */
+    private void openCreateAccountPage() {
+        CreateAccountPage createAccountPage = new CreateAccountPage(stage);
+        createAccountPage.show();
     }
 }
