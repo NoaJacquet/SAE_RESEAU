@@ -90,21 +90,11 @@ public class MessageBd{
     }
 
 
-    public static Message recupererMessage(String message) throws ClassNotFoundException{
-        String[] parts = message.split(" ", 4);
-        String dateStr="";
-        String pseudo ="";
-        String contenu="";
-        if (parts.length >= 4) {
-            dateStr = parts[0] + " " + parts[1];
-            pseudo  = parts[2];
-            contenu = parts[3];
-            
-        }
+    public static Message recupererMessage(String date,String pseudo, String contenu) throws ClassNotFoundException{
         try{
             PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT id_M,id_U,contenu,date,pseudo FROM MESSAGES Natural join UTILISATEUR where pseudo=? and date=? and contenu=?");
             ps.setString(1, pseudo);
-            ps.setString(2, dateStr);
+            ps.setString(2, date);
             ps.setString(3, contenu);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -117,7 +107,22 @@ public class MessageBd{
             return null;
         }
         return null;
+    }
 
-        
+    public static Message recupererMessageById(int id) throws ClassNotFoundException{
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT id_M,id_U,contenu,date,pseudo FROM MESSAGES Natural join UTILISATEUR where id_M=?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Message m = new Message(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5));
+                return m;
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return null;
+        }
+        return null;
     }
 }

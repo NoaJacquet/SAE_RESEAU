@@ -144,12 +144,10 @@ public class ClientHandler extends Thread{
                     // Formatez la date en chaîne de caractères selon le format spécifié
                     String formattedDateTime = now.format(formatter);
 
-                    String messageWithDate = formattedDateTime +" : " +pseudoClient + " : " + message;
+                    String messageWithDate = formattedDateTime +"|||" + pseudoClient + "|||" + message;
                     recipientWriter.println(messageWithDate);
                 }
             }
-            
-        
         }
     }
 
@@ -184,22 +182,45 @@ public class ClientHandler extends Thread{
         return;
     }
 
-    private void liker(String[] recipientMessage){
-        String idMessage=recipientMessage[1];
-        int id=Integer.parseInt(idMessage);
-        for (String pseudo : clients.keySet()) {
-            if (pseudo.equals(recipientMessage[2])) {
-                PrintWriter recipientWriter = clients.get(pseudo);
-                int cpt=0;
-                try {
-                    cpt = LikeBd.countLikeToMessage(id);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                recipientWriter.println(pseudoClient + " a liké le nombre de like est de : "+cpt);
+    private void liker(String[] recipientMessage) {
+        String idMessage = recipientMessage[1];
+        int id = Integer.parseInt(idMessage);
+        Message message=null;
+        try {
+            message = MessageBd.recupererMessageById(id);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        System.out.println("t"+message.getDate());
+        String messageWithDate = "///like"+"|||"+message.getDate() +"|||" + message.getPseudo() + "|||" + message.getContenu();
+        
+        envoieLike(messageWithDate);
+    }
+    
+    private void envoieLike(String message) {
+        List<String> utilisateurs = new ArrayList<>();
+        System.out.println("avant try");
+        try {
+            System.out.println("try entrer");
+            for (Utilisateur u:UtilisateurBd.AllUtilisateur())
+            {
+                System.out.println("pseudo : "+u.getPseudo());
+                utilisateurs.add(u.getPseudo());
+
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("err");
+        }
+        System.out.println("utilisateurs : "+utilisateurs.size());
+        for (String pseudo : utilisateurs) {
+            
+            PrintWriter recipientWriter = clients.get(pseudo);
+            System.out.println("pseudo : "+pseudo+ (recipientWriter==null));
+            if (recipientWriter != null){
+                recipientWriter.println(message);
             }
         }
-        return;
     }
 
 }

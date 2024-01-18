@@ -5,9 +5,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.mysql.cj.util.Util;
+
 import modele.bd.AmisBd;
 import modele.bd.LikeBd;
 import modele.bd.MessageBd;
+import modele.bd.UtilisateurBd;
+import modele.code.Like;
 import modele.code.Message;
 
 public class Client {
@@ -55,7 +60,7 @@ public class Client {
                     e.printStackTrace();
                 }
         for (Message m:MessageBd.recupererLesMessageDeTousSesAmisDansOrdreDate(pseudo)){
-            String s = m.getDate()+" "+m.getPseudo()+" : "+m.getContenu();
+            String s = m.getDate()+"|||"+m.getPseudo()+"|||"+m.getContenu();
             PagePrincipale.afficheMessage(s);
         }
 
@@ -80,14 +85,21 @@ public class Client {
                     try {
                         String serverMessage;
                         while ((serverMessage = this.in.readLine()) != null) {
-                            for (String s:RecevoirMessage){
-                                if (serverMessage.contains(s)){
+                            if (serverMessage.contains("///like")){
+                                System.out.println(serverMessage);
+                                PagePrincipale.afficheMessage(serverMessage);
+                            }
+                            else{
+                                for (String s:RecevoirMessage){ //affiche les messages des amis
+                                    if (serverMessage.contains(s)){
+                                        PagePrincipale.afficheMessage(serverMessage);
+                                    }
+                                }
+                                if (serverMessage.contains(pseudoClient)){
                                     PagePrincipale.afficheMessage(serverMessage);
                                 }
                             }
-                            if (serverMessage.contains(pseudoClient)){
-                                PagePrincipale.afficheMessage(serverMessage);
-                            }
+                            
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -134,9 +146,16 @@ public class Client {
         return NonSuivi;
     }
 
-    public void like(String message) throws ClassNotFoundException{
-        Message m=MessageBd.recupererMessage(message);
+    public void like(String date,String pseudo, String contenu) throws ClassNotFoundException{
+        Message m=MessageBd.recupererMessage(date,pseudo,contenu);
         LikeBd.ajouteLike(m.getIdMessage(), this.pseudoClient);
-        sendMessage("/like "+m.getIdMessage());
+        int compteur=LikeBd.countLikeToMessage(m.getIdMessage());
+        sendMessage("/like "+m.getIdMessage()+" "+compteur);
     }
+
+    public int getIdUser() throws ClassNotFoundException{
+        return UtilisateurBd.recupererUtilisateur(pseudoClient).getId();
+    
+    }
+
 }

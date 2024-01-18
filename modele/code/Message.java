@@ -1,4 +1,6 @@
 package modele.code;
+
+
 public class Message {
     private int idMessage;
     private int idUtilisateur;

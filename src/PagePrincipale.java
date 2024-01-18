@@ -1,12 +1,16 @@
 package src;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import modele.bd.LikeBd;
+import modele.bd.MessageBd;
+import modele.code.Message;
 
 public class PagePrincipale {
     private Stage stage;
@@ -124,23 +128,117 @@ public class PagePrincipale {
         splitPane.setContent(messageArea);
         borderPane.setCenter(splitPane);
 
-        Scene scene = new Scene(borderPane, 800, 600);
+        Scene scene = new Scene(borderPane, 850, 600);
         stage.setScene(scene);
         stage.show();
     }
     
-public static void afficheMessage(String message) {
-    Platform.runLater(() -> {
-        HBox hbox = new HBox();
-        TextArea marea = new TextArea();
-        marea.setText(message);
-        marea.setEditable(false);
-        Button button = new Button("Like");
-        hbox.getChildren().addAll(marea, button);
-        messageArea.getChildren().add(hbox);
-    });
-}
-
+    public static void afficheMessage(String message) {
+        // Déclarez un tableau pour stocker la valeur de nbLike
+        int[] nbLikeArray = new int[1];
+        System.out.println("afficheMessage: " + message);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (message.contains("///like")) {
+                    MettreAJourAffichage(message);
+                    
+                }
+                else{
+                    //====================
+                    // récuperer les valeurs
+                    String date="";
+                    String pseudo="";
+                    String contenu="";
+                    String[] parts = message.split("\\|\\|\\|");
+                    
+                    if (parts.length <= 3) {
+                        date = parts[0].trim();
+                        pseudo = parts[1].trim();
+                        contenu = "";
+                        for (int i = 2; i < parts.length; i++) {
+                            contenu = parts[i].trim();
+                        }
+                    }
+                    Message m = null;
+                    int userLikeMessage = 0;
+                    try {
+                        m = MessageBd.recupererMessage(date, pseudo, contenu);
+                        nbLikeArray[0] = LikeBd.countLikeToMessage(m.getIdMessage());
+                        userLikeMessage = LikeBd.countLikeToMessageByUser(m.getIdMessage(), client.getIdUser());
+        
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    
     
+                    HBox hbox = new HBox();
+                    TextArea marea = new TextArea();
+                    marea.setText("Date : " + date + "\n" + "Pseudo : " + pseudo + "\n" + contenu + "\n" + "Nombre de like : " + nbLikeArray[0]);
+                    marea.setEditable(false);
+                    Button button = new Button("Like");
+                    final String finalContenu = contenu;
+                    final Message finalM = m;
+                    final String finalPseudo = pseudo;
+                    final String finalDate = date;
+                    button.setOnAction(e -> {
+                        try {
+                            client.like(finalDate,finalPseudo, finalContenu);
+                            button.setDisable(true);
+    
+                            // Récupérez le nombre de likes mis à jour après le "Like"
+                            nbLikeArray[0] = LikeBd.countLikeToMessage(finalM.getIdMessage());
+                            marea.setText("Date : " + finalDate + "\n" + "Pseudo : " + finalPseudo + "\n" + finalContenu + "\n" + "Nombre de like : " + nbLikeArray[0]);
+    
+                        } catch (ClassNotFoundException e1) {
+                            e1.printStackTrace();
+                        }
+                    });
+                    if (userLikeMessage != 0) {
+                        button.setDisable(true);
+                    }
+                    hbox.getChildren().addAll(marea, button);
+                    messageArea.getChildren().add(hbox);
 
+                }
+            }
+        });
+    }
+
+
+    public static void MettreAJourAffichage(String message){
+        String[] partsLikes = message.split("\\|\\|\\|");
+        //String[] partsLikes = message.split("\\|\\|\\|\\|");
+        String date = partsLikes[1].trim();
+        String pseudo = partsLikes[2].trim();
+        String contenu = "";
+        for (int i = 3; i < partsLikes.length; i++) {
+            contenu = partsLikes[i].trim();
+        }
+        System.out.println("Date: " + date);
+        System.out.println("Pseudo: " + pseudo);
+        
+        for (Node node : messageArea.getChildren()) {
+            if (node instanceof HBox) {
+                HBox hbox = (HBox) node;
+                for (Node child : hbox.getChildren()) {
+                    if (child instanceof TextArea) {
+                        TextArea marea = (TextArea) child;
+
+                        System.out.println("Texte: " + marea.getText());
+                        System.out.println(marea.getText().contains(date)+" "+ date);
+                        System.out.println(marea.getText().contains(pseudo));
+                        if (marea.getText().contains(date) && marea.getText().contains(pseudo)) {
+                            System.out.println("On y est presque");
+                            try {
+                                marea.setText("Date : " + date + "\n" + "Pseudo : " + pseudo + "\n" + contenu + "\n" + "Nombre de like : " + LikeBd.countLikeToMessage(MessageBd.recupererMessage(date, pseudo, contenu).getIdMessage()));
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
