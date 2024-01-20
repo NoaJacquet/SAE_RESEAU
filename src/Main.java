@@ -114,3 +114,5 @@ public class Main extends Application {
 
 
 // , "java.jdt.ls.vmargs": "--module-path /home/baba/Téléchargements/openjfx-21.0.1_linux-x64_bin-sdk/javafx-sdk-21.0.1/lib --add-modules javafx.controls,javafx.fxml"
+
+// /usr/bin/env /usr/lib/jvm/openjdk-21/bin/java @/tmp/cp_40ogxzvjd7rdfyi07xufk8kfi.argfile src.Serve

@@ -92,6 +92,9 @@ public class Client {
                             if (serverMessage.contains("///likeDislike")){ // permet de mettre a jour le nombre de like et dislike du message concerné
                                 PagePrincipale.afficheMessage(serverMessage);
                             }
+                            else if (serverMessage.contains("///SUPPRIMER")){ // permet de supprimer le message concerné
+                                PagePrincipale.supprimerMessageEtMettreAjourAffichage(serverMessage);
+                            }
                             else{
                                 for (String s:RecevoirMessage){ //affiche les messages des amis
                                     if (serverMessage.contains(s)){
@@ -209,4 +212,25 @@ public class Client {
         sendMessage("/likeDislike "+m.getIdMessage()+" "+compteur);
     }
 
+    /**
+     * Récupère le pseudo de l'utilisateur.
+     *
+     * @return Le pseudo de l'utilisateur.
+     */
+    public String getPseudoClient() {
+        return pseudoClient;
+    }
+
+    /**
+     * Permet de suivre un autre utilisateur.
+     *
+     * @param recipientMessage Le pseudo de l'utilisateur à suivre.
+     * @throws ClassNotFoundException En cas d'erreur lors de l'accès à la base de données.
+     */
+    public void supprimerMessage(String date,String pseudo, String contenu) throws ClassNotFoundException{
+        System.out.println("supprimer message");
+        Message m=MessageBd.recupererMessage(date,pseudo,contenu);
+        System.out.println(" message : "+m.getContenu());
+        sendMessage("/supprimerMessage "+m.getIdMessage());
+    }
 }

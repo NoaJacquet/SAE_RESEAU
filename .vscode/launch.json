@@ -2,20 +2,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "PagePrincipale",
-            "request": "launch",
-            "mainClass": "src.PagePrincipale",
-            "projectName": "SAE_RESEAU_33dc1909"
-        },
-        {
-            "type": "java",
-            "name": "Client",
-            "request": "launch",
-            "mainClass": "src.Client",
-            "projectName": "SAE_RESEAU_33dc1909"
-        },
-        {
-            "type": "java",
             "name": "Server",
             "request": "launch",
             "mainClass": "src.Server",

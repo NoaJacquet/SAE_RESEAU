@@ -89,6 +89,7 @@ public class ClientHandler extends Thread{
             // lire les messages du client et diffuser à tous les autres clients
             String message;
             while ((message = lire.readLine()) != null) {
+                System.out.println(message);
                 this.broadcast(message);
             }
         } 
@@ -115,8 +116,10 @@ public class ClientHandler extends Thread{
      * @param message Le message à diffuser.
      */
     private void broadcast(String message) {
+        System.out.println("test");
         if (message.contains("/")){
             // permet de gerer les evenement de like dislike follow unfollow
+            System.out.println("hahahaha : "+message);
             String[] recipientMessage = message.split(" ");
             if (recipientMessage[0].equals("/follow")) {
                 follow(recipientMessage);
@@ -128,11 +131,13 @@ public class ClientHandler extends Thread{
             else if(recipientMessage[0].equals("/likeDislike")){
                 likerDislike(recipientMessage);
             }
+            else if(recipientMessage[0].equals("/supprimerMessage")){
+                supprimerMessage(recipientMessage);
+            }
         }
         else{
             // permet d'envoyer les messages
             List<String> utilisateurs = new ArrayList<>();
-            System.out.println("heheheh");
 
             try{
                 MessageBd.ajouteMessage(pseudoClient, message);
@@ -214,6 +219,32 @@ public class ClientHandler extends Thread{
         
         envoieLike(messageWithDate);
     }
+
+
+
+    public void supprimerMessage(String[] recipientMessage){
+        System.out.println("supprimer message entrer");
+        String idMessage = recipientMessage[1];
+        int id = Integer.parseInt(idMessage);
+        Message message=null;
+        try {
+            message = MessageBd.recupererMessageById(id);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        System.out.println("t"+message.getDate());
+        String messageWithDate = "///SUPPRIMER"+"|||"+message.getDate() +"|||" + message.getPseudo() + "|||" + message.getContenu();
+        try {
+            MessageBd.supprimerMessage(id);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        envoieLike(messageWithDate);
+    }
+
+
+
+
     
     /**
      * Permet d'envoyer un message à tous les clients connectés.

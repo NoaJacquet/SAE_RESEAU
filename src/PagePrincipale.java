@@ -178,7 +178,6 @@ public class PagePrincipale {
     public static void afficheMessage(String message) {
         // Déclarez un tableau pour stocker la valeur de nbLike
         int[] nbLikeArray = new int[2];
-        System.out.println("afficheMessage: " + message);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -254,16 +253,33 @@ public class PagePrincipale {
                             e1.printStackTrace();
                         }
                     });
+                    Button button3 = null;
+                    if (client.getPseudoClient().equals(pseudo)) {
+                        button3 = new Button("Supprimer");
+                        button3.setOnAction(e -> {
+                            try {
+                                System.out.println("Supprimer");
+                                client.supprimerMessage(finalDate,finalPseudo, finalContenu);
+                                
+                            } catch (ClassNotFoundException e1) {
+                                e1.printStackTrace();
+                            }
+                        });
+                    }
                     if (userLikeMessage != 0) {
                         button.setDisable(true);
                     }
                     hbox.getChildren().addAll(marea, button, button2);
+                    if (button3 != null) {
+                        hbox.getChildren().add(button3);
+                    }
                     messageArea.getChildren().add(0, hbox);
 
                 }
             }
         });
     }
+
 
 
     /**
@@ -296,5 +312,39 @@ public class PagePrincipale {
                 }
             }
         }
+    }
+
+
+    /**
+     * Supprime un message et met à jour l'affichage.
+     * @param Message Le message à supprimer.
+     */
+    public static void supprimerMessageEtMettreAjourAffichage(String Message){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                String[] partsMessage=Message.split("\\|\\|\\|");
+                String date=partsMessage[1].trim();
+                String pseudo=partsMessage[2].trim();
+                HBox hboxASupprimer=null;
+                for (Node node : messageArea.getChildren()) { // Parcourir tous les noeuds dans messageArea
+                    if (node instanceof HBox) { // Si le noeud est un HBox
+                        HBox hbox = (HBox) node;
+                        for (Node child : hbox.getChildren()) { //  Parcourir tous les noeuds dans hbox
+                            if (child instanceof TextArea) { // Si le noeud est un TextArea
+                                TextArea marea = (TextArea) child;
+                                if (marea.getText().contains(date) && marea.getText().contains(pseudo)) { // Si le contenu de marea contient la date et le pseudo
+                                    hboxASupprimer=hbox;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (hboxASupprimer!=null){
+                    messageArea.getChildren().remove(hboxASupprimer);
+                }
+            }
+        });
+        
     }
 }

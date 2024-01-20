@@ -1,6 +1,4 @@
 package modele.bd;
-
-import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -104,7 +102,7 @@ public class MessageBd{
         }
 
         // Tri de la liste par date dans l'ordre decroissant
-        Collections.sort(messages, (msg2, msg1) -> msg1.getDate().compareTo(msg2.getDate()));
+        Collections.sort(messages, (msg1, msg2) -> msg1.getDate().compareTo(msg2.getDate()));
         
         //Collections.sort(messages, (msg1, msg2) -> msg1.getDate().compareTo(msg2.getDate()));
 
@@ -161,5 +159,28 @@ public class MessageBd{
             return null;
         }
         return null;
+    }
+
+    /**
+     * Supprime un message spécifié par son identifiant.    
+     * @param id L'identifiant du message.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
+    public static void supprimerMessage(int id) throws ClassNotFoundException{
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM LIKES WHERE id_M=?");
+            PreparedStatement ps2 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM DISLIKES WHERE id_M=?");
+            PreparedStatement ps1 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM MESSAGES WHERE id_M=?");
+            ps.setInt(1, id);
+            ps2.setInt(1, id);
+            ps1.setInt(1, id);
+            ps.executeUpdate();
+            ps2.executeUpdate();
+            ps1.executeUpdate();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+
     }
 }
