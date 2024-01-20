@@ -37,45 +37,48 @@ public class Server {
 
                 new Thread(()->{
                     BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
-                    try {
-                        String consoleInput = consoleReader.readLine();
-    
-                        if (consoleInput.contains("/deleteUser")) {
-                            String[] parts = consoleInput.split(" ");
-                            String pseudo = parts[1];
-                            try {
-                                if (UtilisateurBd.pseudoExiste(pseudo))
-                                informClientHandlerDeleteUser(pseudo);
-                                else{
-                                    System.out.println("Ce pseudo n'existe pas");
-                                }
-                            } 
-                            catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        else if (consoleInput.contains("/deleteMessage")) {
-                            String[] parts = consoleInput.split(" ");
-                            String idMessageString = parts[1];
-                            try{
-                                int idMessage = Integer.parseInt(idMessageString);
-                                if (MessageBd.messageIdExiste(idMessage))
-                                informClientHandlerDeleteMessage(idMessage);
-                                else{
-                                    System.out.println("Ce message n'existe pas");
+                    while(true){
+                        try {
+                            String consoleInput = consoleReader.readLine();
+        
+                            if (consoleInput.contains("/deleteUser")) {
+                                String[] parts = consoleInput.split(" ");
+                                String pseudo = parts[1];
+                                try {
+                                    if (UtilisateurBd.pseudoExiste(pseudo))
+                                    informClientHandlerDeleteUser(pseudo);
+                                    else{
+                                        System.out.println("Ce pseudo n'existe pas");
+                                    }
+                                } 
+                                catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
                                 }
                             }
-                            catch(NumberFormatException e){
-                                System.out.println("L'identifiant du message doit être un nombre entier.");
+                            else if (consoleInput.contains("/deleteMessage")) {
+                                String[] parts = consoleInput.split(" ");
+                                String idMessageString = parts[1];
+                                try{
+                                    int idMessage = Integer.parseInt(idMessageString);
+                                    if (MessageBd.messageIdExiste(idMessage))
+                                    informClientHandlerDeleteMessage(idMessage);
+                                    else{
+                                        System.out.println("Ce message n'existe pas");
+                                    }
+                                }
+                                catch(NumberFormatException e){
+                                    System.out.println("L'identifiant du message doit être un nombre entier.");
+                                }
+                                catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
+                                }
+                                
                             }
-                            catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+
                 }).start();
 
             }
@@ -132,7 +135,6 @@ public class Server {
                 if (writer != null) {
                     writer.println(envoie);
                 }
-                clients.remove(pseudo);
             }
             
             try {
