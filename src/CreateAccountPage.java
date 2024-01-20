@@ -100,8 +100,6 @@ public class CreateAccountPage {
                     Client client = new Client(username);
                     
                     client.lancement();
-                    
-                    System.out.println("connexion réussie");
                     Main.getInstance().setUtilisateurBd(UtilisateurBd.getUtilisateur(username, password));
                     PagePrincipale pagePrincipale = new PagePrincipale(stage,client);
                     pagePrincipale.show();

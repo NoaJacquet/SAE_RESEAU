@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import modele.bd.LikeBd;
 import modele.bd.MessageBd;
+import modele.bd.UtilisateurBd;
 import modele.code.Message;
 
 /**
@@ -346,5 +347,26 @@ public class PagePrincipale {
             }
         });
         
+    }
+
+
+    public static void afficherPopUpBannissement() {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Bannissement");
+            alert.setHeaderText(null);
+            alert.setContentText("Vous avez été banni. La connexion sera fermée.");
+            alert.showAndWait();
+    
+            // Fermer l'application après la confirmation
+            Platform.exit();
+            try {
+                UtilisateurBd.deleteUser(client.getPseudoClient());
+            }
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            System.exit(0);
+        });
     }
 }

@@ -116,7 +116,10 @@ public class ClientHandler extends Thread{
      * @param message Le message à diffuser.
      */
     private void broadcast(String message) {
-        System.out.println("test");
+        if (message.equals("Votre compte a été supprimé. La connexion sera fermée.")){
+            // si le message est supprimer le compte alors le message est envoyer au client et le client est deconnecter
+            this.ecrire.println(message);
+        }
         if (message.contains("/")){
             // permet de gerer les evenement de like dislike follow unfollow
             System.out.println("hahahaha : "+message);
@@ -217,7 +220,7 @@ public class ClientHandler extends Thread{
         System.out.println("t"+message.getDate());
         String messageWithDate = "///likeDislike"+"|||"+message.getDate() +"|||" + message.getPseudo() + "|||" + message.getContenu();
         
-        envoieLike(messageWithDate);
+        envoieMessageAllUser(messageWithDate);
     }
 
 
@@ -239,7 +242,7 @@ public class ClientHandler extends Thread{
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        envoieLike(messageWithDate);
+        envoieMessageAllUser(messageWithDate);
     }
 
 
@@ -251,7 +254,7 @@ public class ClientHandler extends Thread{
      *
      * @param message Le message à envoyer.
      */
-    private void envoieLike(String message) {
+    private void envoieMessageAllUser(String message) {
         List<String> utilisateurs = new ArrayList<>();
         try {
             for (Utilisateur u:UtilisateurBd.AllUtilisateur()) 

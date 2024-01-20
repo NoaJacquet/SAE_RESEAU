@@ -150,4 +150,33 @@ public class UtilisateurBd {
             return false;
         }
     }
+
+    /**
+     * Supprime un utilisateur spécifié par son pseudo.
+     *
+     * @param pseudo Le pseudo de l'utilisateur à supprimer.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
+    public static void deleteUser(String pseudo) throws ClassNotFoundException{
+        try{
+            
+            
+            PreparedStatement ps1 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM LIKES WHERE id_U=(SELECT id_U FROM UTILISATEUR WHERE pseudo=?)");
+            PreparedStatement ps2 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM DISLIKES WHERE id_U=(SELECT id_U FROM UTILISATEUR WHERE pseudo=?)");
+            PreparedStatement ps3 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM MESSAGES WHERE id_U=(SELECT id_U FROM UTILISATEUR WHERE pseudo=?)");
+            PreparedStatement ps4 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM AMIS WHERE suiveur=(SELECT id_U FROM UTILISATEUR WHERE pseudo=?)");
+            PreparedStatement ps5 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM AMIS WHERE suivi=(SELECT id_U FROM UTILISATEUR WHERE pseudo=?)");
+            PreparedStatement ps6 = Main.getInstance().getSqlConnect().prepareStatement("DELETE FROM UTILISATEUR WHERE pseudo=?");
+            ps1.setString(1, pseudo);
+            ps2.setString(1, pseudo);
+            ps3.setString(1, pseudo);
+            ps4.setString(1, pseudo);
+            ps5.setString(1, pseudo);
+            ps6.setString(1, pseudo);
+            ps1.executeUpdate(); ps2.executeUpdate(); ps3.executeUpdate(); ps4.executeUpdate(); ps5.executeUpdate();ps6.executeUpdate();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+    }
 }

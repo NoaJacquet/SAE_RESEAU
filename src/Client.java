@@ -89,7 +89,10 @@ public class Client {
                     try {
                         String serverMessage;
                         while ((serverMessage = this.in.readLine()) != null) {
-                            if (serverMessage.contains("///likeDislike")){ // permet de mettre a jour le nombre de like et dislike du message concerné
+                            if (serverMessage.equals("Votre compte a été supprimé. La connexion sera fermée.")){
+                                PagePrincipale.afficherPopUpBannissement();
+                            }
+                            else if (serverMessage.contains("///likeDislike")){ // permet de mettre a jour le nombre de like et dislike du message concerné
                                 PagePrincipale.afficheMessage(serverMessage);
                             }
                             else if (serverMessage.contains("///SUPPRIMER")){ // permet de supprimer le message concerné
