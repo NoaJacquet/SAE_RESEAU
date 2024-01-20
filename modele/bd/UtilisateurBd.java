@@ -179,4 +179,30 @@ public class UtilisateurBd {
             e.printStackTrace();
         }
     }
+
+
+    /**
+     * Modifie le mot de passe d'un utilisateur spécifié par son pseudo.
+     *
+     * @param pseudo Le pseudo de l'utilisateur.
+     * @param mdp    Le nouveau mot de passe de l'utilisateur.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
+    public static boolean pseudoExiste(String pseudo) throws ClassNotFoundException{
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM UTILISATEUR WHERE pseudo = ?");
+            ps.setString(1, pseudo);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

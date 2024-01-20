@@ -183,4 +183,29 @@ public class MessageBd{
         }
 
     }
+
+    /**
+     * Récupère les messages d'un utilisateur spécifié par son pseudo.
+     *
+     * @param pseudo Le pseudo de l'utilisateur.
+     * @return Une liste de messages triés par date dans l'ordre décroissant.
+     * @throws ClassNotFoundException Si la classe n'est pas trouvée lors de l'accès à la base de données.
+     */
+    public static boolean messageIdExiste(int id) throws ClassNotFoundException{
+        try{
+            PreparedStatement ps = Main.getInstance().getSqlConnect().prepareStatement("SELECT * FROM MESSAGES WHERE id_M = ?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

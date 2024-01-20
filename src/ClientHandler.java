@@ -116,9 +116,12 @@ public class ClientHandler extends Thread{
      * @param message Le message à diffuser.
      */
     private void broadcast(String message) {
+
+        System.out.println("message : "+message);
         if (message.equals("Votre compte a été supprimé. La connexion sera fermée.")){
             // si le message est supprimer le compte alors le message est envoyer au client et le client est deconnecter
             this.ecrire.println(message);
+            System.out.println("pseudo : "+pseudoClient);
         }
         if (message.contains("/")){
             // permet de gerer les evenement de like dislike follow unfollow
@@ -226,16 +229,15 @@ public class ClientHandler extends Thread{
 
 
     public void supprimerMessage(String[] recipientMessage){
-        System.out.println("supprimer message entrer");
         String idMessage = recipientMessage[1];
         int id = Integer.parseInt(idMessage);
         Message message=null;
+        System.out.println("id : "+id);
         try {
             message = MessageBd.recupererMessageById(id);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        System.out.println("t"+message.getDate());
         String messageWithDate = "///SUPPRIMER"+"|||"+message.getDate() +"|||" + message.getPseudo() + "|||" + message.getContenu();
         try {
             MessageBd.supprimerMessage(id);
