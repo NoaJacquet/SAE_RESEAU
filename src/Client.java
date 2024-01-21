@@ -3,6 +3,8 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import javafx.application.Platform;
 import modele.bd.AmisBd;
 import modele.bd.LikeBd;
 import modele.bd.MessageBd;
@@ -23,6 +25,7 @@ public class Client {
     private BufferedReader in;
     private PrintWriter out;
     private String pseudoClient;
+    private boolean nouveau;
 
     /**
      * Initialise une nouvelle instance de la classe Client avec le pseudo spécifié.
@@ -30,8 +33,9 @@ public class Client {
      * @param pseudo Le pseudo du client.
      * @throws ClassNotFoundException En cas d'erreur lors de l'accès à la base de données.
      */
-    public Client(String pseudo) throws ClassNotFoundException {
+    public Client(String pseudo,boolean nouveau) throws ClassNotFoundException {
         this.pseudoClient = pseudo;
+        this.nouveau=nouveau;
         List<modele.code.Utilisateur> liste;
                 try {
                     liste = AmisBd.RecevoirMessage(pseudo);
@@ -98,6 +102,35 @@ public class Client {
                             else if (serverMessage.contains("///SUPPRIMER")){ // permet de supprimer le message concerné
                                 PagePrincipale.supprimerMessageEtMettreAjourAffichage(serverMessage);
                             }
+                            else if (serverMessage.contains("///nouveau")){ // permet de mettre a jour la liste des personnes non suivies
+                                Platform.runLater(() -> {
+                                    List<modele.code.Utilisateur> liste3;
+                                    try {
+                                        liste3 = AmisBd.NonSuivi(pseudoClient);
+                                        NonSuivi.clear();
+                                        for (modele.code.Utilisateur utilisateur : liste3) {
+                                            System.out.println("non suivi : "+utilisateur.getPseudo());
+                                            NonSuivi.add(utilisateur.getPseudo());
+                                        }
+                                    } catch (ClassNotFoundException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    List<modele.code.Utilisateur> liste;
+                                    try {
+                                        liste = AmisBd.RecevoirMessage(pseudoClient);
+                                        RecevoirMessage.clear();
+                                        for (modele.code.Utilisateur utilisateur : liste) {
+                                            System.out.println("amis : "+utilisateur.getPseudo());
+                                            RecevoirMessage.add(utilisateur.getPseudo());
+                                        }
+                                    } catch (ClassNotFoundException e) {
+                                        e.printStackTrace();
+                                    }
+                                    PagePrincipale.MettreAjourListeNonSuivi(NonSuivi,RecevoirMessage);
+                                });
+                               
+                            }
                             else{
                                 for (String s:RecevoirMessage){ //affiche les messages des amis
                                     if (serverMessage.contains(s)){
@@ -115,9 +148,14 @@ public class Client {
                     }
                 }).start();
 
+
                 // Envoyer des messages depuis le terminal
                 out.println(this.pseudoClient);
                 System.out.println("Connecté avec le pseudo: " + this.pseudoClient);
+                
+                if (nouveau){
+                    sendMessage("/nouveau");
+                }
     }
 
 
@@ -233,7 +271,6 @@ public class Client {
     public void supprimerMessage(String date,String pseudo, String contenu) throws ClassNotFoundException{
         System.out.println("supprimer message");
         Message m=MessageBd.recupererMessage(date,pseudo,contenu);
-        System.out.println(" message : "+m.getContenu());
         sendMessage("/supprimerMessage "+m.getIdMessage());
     }
 }

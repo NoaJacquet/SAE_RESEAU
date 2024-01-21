@@ -97,7 +97,7 @@ public class CreateAccountPage {
         if (isCreated){
             try{
                 if (UtilisateurBd.getUtilisateur(username, password) != null){
-                    Client client = new Client(username);
+                    Client client = new Client(username,true);
                     
                     client.lancement();
                     Main.getInstance().setUtilisateurBd(UtilisateurBd.getUtilisateur(username, password));

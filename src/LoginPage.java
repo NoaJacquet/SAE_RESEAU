@@ -74,7 +74,7 @@ public class LoginPage {
         try {
             // Effectuer la connexion à la base de données avec les informations de connexion
             if (UtilisateurBd.getUtilisateur(username, password) != null){
-                Client client = new Client(username);
+                Client client = new Client(username,false);
                 
                 client.lancement();
                 

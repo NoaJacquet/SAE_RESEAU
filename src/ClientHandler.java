@@ -140,6 +140,15 @@ public class ClientHandler extends Thread{
             else if(recipientMessage[0].equals("/supprimerMessage")){
                 supprimerMessage(recipientMessage);
             }
+            else if (recipientMessage[0].equals("/nouveau")){
+                for (String ps:clients.keySet()){
+                    PrintWriter recipientWriter = clients.get(ps);
+                    if (recipientWriter != null){
+                        recipientWriter.println("///nouveau");
+                    }
+                    
+                }
+            }
         }
         else{
             // permet d'envoyer les messages
@@ -162,6 +171,7 @@ public class ClientHandler extends Thread{
             for (String pseudo : utilisateurs) {
                 PrintWriter recipientWriter = clients.get(pseudo);
                 if (recipientWriter != null){
+                    System.out.println("pseudo : "+recipientWriter);
                     LocalDateTime now = LocalDateTime.now();
 
                     // pour le format de la date
@@ -186,6 +196,7 @@ public class ClientHandler extends Thread{
         for (String pseudo : clients.keySet()) {
             if (pseudo.equals(recipientMessage[1])) {
                 RecevoirMessage.add(recipientMessage[1]);
+                System.out.println(RecevoirMessage);
             }
         }
         

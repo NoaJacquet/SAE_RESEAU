@@ -1,4 +1,6 @@
 package src;
+import java.util.List;
+
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -10,7 +12,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import modele.bd.LikeBd;
 import modele.bd.MessageBd;
-import modele.bd.UtilisateurBd;
 import modele.code.Message;
 
 /**
@@ -20,8 +21,8 @@ import modele.code.Message;
 public class PagePrincipale {
     private Stage stage;
     private static Client client;
-    private VBox listeNonAmis = new VBox();
-    private VBox Amis = new VBox();
+    private static VBox listeNonAmis = new VBox();
+    private static VBox Amis = new VBox();
     private static  VBox messageArea = new VBox();
     private ScrollPane scrollPane = new ScrollPane();
 
@@ -35,9 +36,8 @@ public class PagePrincipale {
         this.stage = stage;
         this.client=client;
         stage.setTitle("Page principale");
-        this.listeNonAmis.getChildren().addAll(new Label("Non amis"));
+        listeNonAmis.getChildren().addAll(new Label("Non amis"));
         Amis.getChildren().addAll(new Label("amis"));
-       
     }
 
     /**
@@ -48,7 +48,7 @@ public class PagePrincipale {
      * @param isAmi Si l'ami est un ami ou non.
      * @return Un affichage pour un ami.
      */
-    private HBox createFriendDisplay(String friendName, Client client, boolean isAmi) {
+    private static HBox createFriendDisplay(String friendName, Client client, boolean isAmi) {
             HBox interieur = new HBox();
             Label label = new Label(friendName);
             Button button = new Button(isAmi ? "Supprimer" : "Ajouter");
@@ -73,7 +73,7 @@ public class PagePrincipale {
      * @param isAmi Si l'ami est un ami ou non.
      * @throws ClassNotFoundException En cas d'erreur lors de l'accès à la base de données.
      */
-    private void handleFriendAction(String friendName, Client client, boolean isAmi) throws ClassNotFoundException {
+    private static void handleFriendAction(String friendName, Client client, boolean isAmi) throws ClassNotFoundException {
         if (isAmi) {
             client.supprimeAmis(friendName);
         } else {
@@ -89,7 +89,7 @@ public class PagePrincipale {
      * @param isAmi Si l'ami est un ami ou non.
      * @throws ClassNotFoundException En cas d'erreur lors de l'accès à la base de données.
      */
-    private void updateFriendDisplay(HBox container, String friendName, Client client, boolean isAmi) {
+    private static void updateFriendDisplay(HBox container, String friendName, Client client, boolean isAmi) {
         container.getChildren().clear();
         Label label = new Label(friendName);
         Button button = new Button();
@@ -131,17 +131,21 @@ public class PagePrincipale {
         BorderPane borderPane = new BorderPane();
         // liste non amis
         // Affichage des non-amis
-        for (String string : client.getNonSuivi()) {
-            HBox interieur = createFriendDisplay(string, client, false);
-            listeNonAmis.getChildren().add(interieur);
-        }
+        Platform.runLater(() -> {
+            for (String string : client.getNonSuivi()) {
+                HBox interieur = createFriendDisplay(string, client, false);
+                listeNonAmis.getChildren().add(interieur);
+            }
+        });
+        
         borderPane.setLeft(listeNonAmis);
 
-        // Affichage des amis
-        for (String string : client.getRecevoirMessage()) {
-            HBox interieur = createFriendDisplay(string, client, true);
-            Amis.getChildren().add(interieur);
-        }
+        Platform.runLater(() -> {
+            for (String string : client.getRecevoirMessage()) {
+                HBox interieur = createFriendDisplay(string, client, true);
+                Amis.getChildren().add(interieur);
+            }
+        });
         borderPane.setRight(Amis);
 
 
@@ -207,10 +211,13 @@ public class PagePrincipale {
                     int userDislikeMessage = 0;
                     try {
                         m = MessageBd.recupererMessage(date, pseudo, contenu);
-                        nbLikeArray[0] = LikeBd.countLikeToMessage(m.getIdMessage());
-                        nbLikeArray[1] = LikeBd.countDisikeToMessage(m.getIdMessage());
-                        userLikeMessage = LikeBd.countLikeToMessageByUser(m.getIdMessage(), client.getIdUser());
-                        userDislikeMessage = LikeBd.countDislikeToMessageByUser(m.getIdMessage(), client.getIdUser());
+                        if (m != null) {
+                            nbLikeArray[0] = LikeBd.countLikeToMessage(m.getIdMessage());
+                            nbLikeArray[1] = LikeBd.countDisikeToMessage(m.getIdMessage());
+                            userLikeMessage = LikeBd.countLikeToMessageByUser(m.getIdMessage(), client.getIdUser());
+                            userDislikeMessage = LikeBd.countDislikeToMessageByUser(m.getIdMessage(), client.getIdUser());
+                        }
+
         
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
@@ -349,7 +356,10 @@ public class PagePrincipale {
         
     }
 
-
+    /**
+     * Affiche une pop-up de bannissement.
+     * 
+     */
     public static void afficherPopUpBannissement() {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -360,13 +370,31 @@ public class PagePrincipale {
     
             // Fermer l'application après la confirmation
             Platform.exit();
-            try {
-                UtilisateurBd.deleteUser(client.getPseudoClient());
-            }
-            catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            
             System.exit(0);
         });
     }
+
+    /**
+     * Met à jour la liste des personnes non suivies.
+     * @param message Le message contenant la liste des personnes non suivies.
+     */
+    public static void MettreAjourListeNonSuivi(List<String> listeNonSuivi, List<String> listeAmis) {
+        Platform.runLater(() -> {
+            listeNonAmis.getChildren().clear();
+            listeNonAmis.getChildren().addAll(new Label("Non amis"));
+            for (String utilisateur : listeNonSuivi) {
+                HBox interieur = createFriendDisplay(utilisateur, client, false);
+                System.out.println("utilisateur : " + utilisateur);
+                listeNonAmis.getChildren().add(interieur);
+            }
+            Amis.getChildren().clear();
+            Amis.getChildren().addAll(new Label("amis"));
+            for (String utilisateur : listeAmis) {
+                HBox interieur = createFriendDisplay(utilisateur, client, true);
+                Amis.getChildren().add(interieur);
+            }
+        });
+    }
+    
 }

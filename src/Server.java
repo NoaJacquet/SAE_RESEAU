@@ -36,17 +36,17 @@ public class Server {
                 clientHandler.start();
 
                 new Thread(()->{
-                    BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
+                    BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));  // Pour lire les commandes entrées dans la console
                     while(true){
                         try {
                             String consoleInput = consoleReader.readLine();
         
-                            if (consoleInput.contains("/deleteUser")) {
-                                String[] parts = consoleInput.split(" ");
+                            if (consoleInput.contains("/deleteUser")) { // Si la commande entrée est /deleteUser
+                                String[] parts = consoleInput.split(" "); // On sépare la commande et le pseudo
                                 String pseudo = parts[1];
                                 try {
-                                    if (UtilisateurBd.pseudoExiste(pseudo))
-                                    informClientHandlerDeleteUser(pseudo);
+                                    if (UtilisateurBd.pseudoExiste(pseudo)) // Si le pseudo existe
+                                    informClientHandlerDeleteUser(pseudo);  // On informe le ClientHandler de la suppression de l'utilisateur
                                     else{
                                         System.out.println("Ce pseudo n'existe pas");
                                     }
@@ -55,13 +55,13 @@ public class Server {
                                     e.printStackTrace();
                                 }
                             }
-                            else if (consoleInput.contains("/deleteMessage")) {
-                                String[] parts = consoleInput.split(" ");
+                            else if (consoleInput.contains("/deleteMessage")) {  // Si la commande entrée est /deleteMessage
+                                String[] parts = consoleInput.split(" "); // On sépare la commande et l'identifiant du message
                                 String idMessageString = parts[1];
                                 try{
-                                    int idMessage = Integer.parseInt(idMessageString);
+                                    int idMessage = Integer.parseInt(idMessageString);  // On convertit l'identifiant du message en entier
                                     if (MessageBd.messageIdExiste(idMessage))
-                                    informClientHandlerDeleteMessage(idMessage);
+                                    informClientHandlerDeleteMessage(idMessage);    // On informe le ClientHandler de la suppression du message
                                     else{
                                         System.out.println("Ce message n'existe pas");
                                     }
@@ -93,18 +93,38 @@ public class Server {
      * 
      */
     private static void informClientHandlerDeleteUser(String pseudo) {
-        if (clients.containsKey(pseudo)) {
+        try {
+            UtilisateurBd.deleteUser(pseudo); // Supprime l'utilisateur de la base de données
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (clients.containsKey(pseudo)) {  // Si le pseudo est dans la liste des clients connectés
             PrintWriter userWriter = clients.get(pseudo);
             // Informe le ClientHandler de la suppression de l'utilisateur
-            userWriter.println("Votre compte a été supprimé. La connexion sera fermée.");
+            userWriter.println("Votre compte a été supprimé. La connexion sera fermée."); // Envoie un message au client pour l'informer de la suppression de son compte
+
+            for (String pseudoClient : clients.keySet()) {
+                PrintWriter writer = clients.get(pseudoClient); // Envoie un message à tous les autres clients pour les informer de la suppression de l'utilisateur
+                if (writer != null) {
+                    writer.println("///nouveau");
+                }
+            }
         }
         else{
             try {
                 UtilisateurBd.deleteUser(pseudo);
+                for (String pseudoClient : clients.keySet()) {
+                    PrintWriter writer = clients.get(pseudoClient); // Envoie un message à tous les autres clients pour les informer de la suppression de l'utilisateur
+                    if (writer != null) {
+                        writer.println("///nouveau");
+                    }
+                }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
+
     }
 
     /**
@@ -113,10 +133,11 @@ public class Server {
      * 
      */
     private static void informClientHandlerDeleteMessage(int idMessage) {
+        
         if (clients.isEmpty()) {
             try {
                 MessageBd.supprimerMessage(idMessage);
-                System.out.println("Message supprimé. acun client");
+                System.out.println("Message supprimé");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
